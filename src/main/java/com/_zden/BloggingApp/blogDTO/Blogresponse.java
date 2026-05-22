@@ -1,10 +1,11 @@
 package com._zden.BloggingApp.blogDTO;
 
-import java.util.UUID;
 
-public record createBlogDTO(
+
+public record Blogresponse(
         String title,
         String content,
-        String author
+        String author,
+        int likes
 ) {
 }

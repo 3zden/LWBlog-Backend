@@ -2,11 +2,11 @@ package com._zden.BloggingApp.Service;
 
 
 import com._zden.BloggingApp.Entities.Blog;
+import com._zden.BloggingApp.Mapper.userMapper;
 import com._zden.BloggingApp.Repo.BlogRepo;
-import com._zden.BloggingApp.blogDTO.BlogResponseDTO;
+import com._zden.BloggingApp.blogDTO.Blogresponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 
@@ -14,16 +14,19 @@ import java.util.List;
 public class BlogService {
     @Autowired
     BlogRepo repo;
+    userMapper mapper  = new userMapper();
 
     // Get all blogs
-    public List<Blog> getBlogs(){
-        return repo.findAll();
+    public List<Blogresponse> getBlogs(){
+        List<Blog> temp = repo.findAll();
+        List<Blogresponse> blgs = temp.stream().
+                map(blog -> mapper.toDto(blog)).toList();
+        return blgs;
     }
 
     // Get Blog By id
-    public BlogResponseDTO getBlog(int id){
-//        return (BlogResponseDTO) repo.findById(id);
-        return null;
+    public Blogresponse getBlog(int id){
+        return mapper.toDto(repo.findById(id).orElse(null));
     }
 
     // Post Blog
