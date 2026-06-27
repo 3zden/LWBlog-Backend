@@ -1,5 +1,7 @@
 package com._zden.BloggingApp.Configuration;
 
+import com._zden.BloggingApp.Jwt.JwtFilter;
+import com._zden.BloggingApp.Jwt.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,15 +14,15 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
-
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
     BCryptPasswordEncoder bCryptPasswordEncoder;
-
+    @Autowired
+    JwtFilter jwt;
     @Autowired
     UserDetailsService userDetailsService;
     @Bean
@@ -32,7 +34,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                ).httpBasic(Customizer.withDefaults());
+                ).addFilterBefore(jwt, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -41,7 +43,7 @@ public class SecurityConfig {
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
-        provider.setPasswordEncoder(bCryptPasswordEncoder);
+        provider.setPasswordEncoder(new BCryptPasswordEncoder());
         return provider;
     }
 }

@@ -4,7 +4,9 @@ import com._zden.BloggingApp.DTOs.CreateUserDTO;
 import com._zden.BloggingApp.DTOs.LoginUser;
 import com._zden.BloggingApp.DTOs.UserDTO;
 import com._zden.BloggingApp.Entities.User;
+import com._zden.BloggingApp.Jwt.JwtService;
 import com._zden.BloggingApp.Repositories.UserRepo;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import java.util.Objects;
 public class UserService {
     authTest auth = new authTest();
     UserRepo userRepo;
+    JwtService jwtService;
     public ResponseEntity<User> createUser(CreateUserDTO user) throws Exception {
         User temp = new User(user.email(),auth.hash(user.password()),user.firstName(),user.lastName());
         userRepo.save(temp);
@@ -26,8 +29,8 @@ public class UserService {
         if (userRepo.existsUserByEmail(user.email())){
             User temp = userRepo.findByEmail(user.email());
             if (Objects.equals(temp.getPassword(), auth.hash(user.password()))){
-                System.out.println("the user is aithentificated!!!");
-                return ResponseEntity.status(HttpStatus.FOUND).body(temp);
+                System.out.println("the user is authentificated!!!");
+                return ResponseEntity.ok(jwtService.generateJwtToken(temp.getEmail(), temp.getPassword()));
             }else {return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();}
         }
         else {return ResponseEntity.status(HttpStatus.NOT_FOUND).build();}
@@ -37,7 +40,8 @@ public class UserService {
         return userRepo.findAll();
 
     }
-    public UserService(UserRepo userRepo){
+    public UserService(UserRepo userRepo, JwtService jwtService){
         this.userRepo = userRepo;
+        this.jwtService = jwtService;
     }
 }
